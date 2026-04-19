@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dementia Screening Assistant</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Explainable AI screening</p>
+        <h1>Early-stage dementia risk check</h1>
+        <p class="lede">Use clinical scores, daily behavior, history, and optional biomarkers to estimate risk and see which indicators influenced the result.</p>
+      </div>
+      <img
+        src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=640&q=80"
+        alt="Clinician reviewing health notes"
+      />
+    </header>
+
+    <main class="layout">
+      <form id="screening-form" class="panel">
+        <div class="section-heading">
+          <span>Step 1</span>
+          <h2>Who is completing this?</h2>
+        </div>
+        <div class="choice-row" role="radiogroup" aria-label="Respondent">
+          <label><input type="radio" name="respondent" value="Patient" checked /> Patient</label>
+          <label><input type="radio" name="respondent" value="Caregiver" /> Caregiver</label>
+          <label><input type="radio" name="respondent" value="Clinician" /> Clinician</label>
+        </div>
+
+        <div class="section-heading">
+          <span>Step 2</span>
+          <h2 id="form-title">Tell us about your screening indicators</h2>
+        </div>
+
+        <div class="grid two">
+          <label>Age <input name="age" type="number" min="45" max="100" value="68" /></label>
+          <label>Years of education <input name="education_years" type="number" min="0" max="25" value="12" /></label>
+          <label>Family history
+            <select name="family_history">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </label>
+          <label>APOE-e4 carrier
+            <select name="apoe4">
+              <option value="0">No or unknown</option>
+              <option value="1">Yes</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="section-heading compact">
+          <span>Clinical</span>
+          <h2>Screening scores</h2>
+        </div>
+        <div class="grid three">
+          <label>MMSE score <input name="mmse" type="number" min="0" max="30" step="0.5" value="27" /></label>
+          <label>MoCA score <input name="moca" type="number" min="0" max="30" step="0.5" value="25" /></label>
+          <label>CDR score
+            <select name="cdr">
+              <option value="0">0</option>
+              <option value="0.5">0.5</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="section-heading compact">
+          <span>Behavior</span>
+          <h2 id="behavior-title">Daily changes</h2>
+        </div>
+        <div class="grid three">
+          <label>Memory recall <input name="memory_recall" type="number" min="0" max="10" step="0.5" value="8" /></label>
+          <label>Orientation <input name="orientation" type="number" min="0" max="10" step="0.5" value="9" /></label>
+          <label>Daily function <input name="daily_function" type="number" min="0" max="10" step="0.5" value="8" /></label>
+          <label>Mood change <input name="mood_change" type="number" min="0" max="10" step="0.5" value="2" /></label>
+          <label>Sleep quality <input name="sleep_quality" type="number" min="0" max="10" step="0.5" value="7" /></label>
+          <label>Medication adherence <input name="medication_adherence" type="number" min="0" max="10" step="0.5" value="8" /></label>
+          <label>Wandering or getting lost
+            <select name="wandering">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </label>
+          <label>Hypertension
+            <select name="hypertension">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </label>
+          <label>Diabetes
+            <select name="diabetes">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="section-heading compact">
+          <span>Optional</span>
+          <h2>Biomarkers</h2>
+        </div>
+        <div class="grid two">
+          <label>CSF amyloid-beta <input name="amyloid_beta" type="number" min="200" max="1500" value="900" /></label>
+          <label>CSF tau <input name="tau" type="number" min="50" max="1000" value="300" /></label>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Calculate risk</button>
+          <button type="button" id="sample-high" class="secondary">Use high-risk sample</button>
+          <button type="reset" class="ghost">Reset</button>
+        </div>
+      </form>
+
+      <aside class="panel result-panel" aria-live="polite">
+        <div class="section-heading">
+          <span>Result</span>
+          <h2 id="risk-label">Awaiting screening</h2>
+        </div>
+        <div class="gauge" aria-label="High-risk probability">
+          <svg viewBox="0 0 120 120" role="img">
+            <circle class="track" cx="60" cy="60" r="48"></circle>
+            <circle class="progress" id="gauge-progress" cx="60" cy="60" r="48"></circle>
+          </svg>
+          <strong id="risk-score">0%</strong>
+        </div>
+        <p id="summary" class="summary">Enter the available indicators and calculate a screening result.</p>
+
+        <div class="probabilities" id="probabilities"></div>
+
+        <h3>Top contributing factors</h3>
+        <div id="factors" class="factors"></div>
+
+        <button type="button" id="report-button" disabled>Download PDF report</button>
+        <p class="small">This tool supports screening conversations. It does not provide a medical diagnosis.</p>
+      </aside>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

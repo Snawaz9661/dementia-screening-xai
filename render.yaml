@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: dementia-screening-xai
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python -m backend.ml.train
+    startCommand: python -m backend.start
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
