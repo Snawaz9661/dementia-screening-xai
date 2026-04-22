@@ -3,145 +3,1699 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dementia Screening Assistant</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <title>Memory Health Check</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --sky: #e8f4fd;
+        --sky-mid: #bfdbfe;
+        --blue: #1d4ed8;
+        --blue-soft: #3b82f6;
+        --blue-dark: #1e3a8a;
+        --green: #166534;
+        --green-bg: #dcfce7;
+        --amber: #92400e;
+        --amber-bg: #fef3c7;
+        --red: #991b1b;
+        --red-bg: #fee2e2;
+        --ink: #1e293b;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --white: #ffffff;
+        --paper: #f8fafc;
+        --radius: 16px;
+        --shadow: 0 4px 24px rgba(30,58,138,0.08);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: 'Nunito', sans-serif;
+        background: var(--sky);
+        color: var(--ink);
+        min-height: 100vh;
+      }
+
+      /* ── HEADER ── */
+      .header {
+        background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
+        color: white;
+        padding: 28px clamp(20px, 5%, 64px) 32px;
+        text-align: center;
+      }
+
+      .header-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        display: block;
+      }
+
+      .header h1 {
+        font-family: 'Lora', serif;
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        font-weight: 600;
+        margin-bottom: 12px;
+        line-height: 1.2;
+      }
+
+      .header p {
+        font-size: clamp(1rem, 2vw, 1.15rem);
+        opacity: 0.88;
+        max-width: 600px;
+        margin: 0 auto 20px;
+        line-height: 1.6;
+      }
+
+      .who-selector {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .who-btn {
+        background: rgba(255,255,255,0.15);
+        border: 2px solid rgba(255,255,255,0.4);
+        color: white;
+        border-radius: 50px;
+        padding: 10px 22px;
+        font-family: 'Nunito', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .who-btn:hover { background: rgba(255,255,255,0.25); }
+      .who-btn.active {
+        background: white;
+        color: var(--blue-dark);
+        border-color: white;
+      }
+
+      /* ── PROGRESS BAR ── */
+      .progress-bar-wrap {
+        background: white;
+        padding: 16px clamp(20px, 5%, 64px);
+        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      }
+
+      .progress-steps {
+        display: flex;
+        gap: 6px;
+        max-width: 700px;
+        margin: 0 auto;
+        align-items: center;
+      }
+
+      .step-dot {
+        flex: 1;
+        height: 8px;
+        border-radius: 4px;
+        background: var(--line);
+        transition: background 0.3s;
+      }
+
+      .step-dot.done { background: var(--blue); }
+      .step-dot.current { background: var(--blue-soft); }
+
+      .step-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 6px;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* ── MAIN LAYOUT ── */
+      .main {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 28px 20px 60px;
+      }
+
+      /* ── SECTION CARD ── */
+      .section-card {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px;
+        margin-bottom: 20px;
+        border: 1px solid var(--sky-mid);
+        display: none;
+      }
+
+      .section-card.visible { display: block; }
+
+      .section-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: var(--blue);
+        color: white;
+        border-radius: 50%;
+        font-size: 1rem;
+        font-weight: 900;
+        margin-bottom: 12px;
+      }
+
+      .section-title {
+        font-family: 'Lora', serif;
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--blue-dark);
+        margin-bottom: 6px;
+      }
+
+      .section-desc {
+        font-size: 1rem;
+        color: var(--muted);
+        line-height: 1.55;
+        margin-bottom: 22px;
+      }
+
+      /* ── QUESTION ROWS ── */
+      .question {
+        margin-bottom: 22px;
+      }
+
+      .q-label {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--ink);
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .q-hint {
+        font-size: 0.88rem;
+        color: var(--muted);
+        margin-bottom: 10px;
+        line-height: 1.45;
+        font-style: italic;
+      }
+
+      /* ── YES/NO BUTTONS ── */
+      .yn-group {
+        display: flex;
+        gap: 10px;
+      }
+
+      .yn-btn {
+        flex: 1;
+        padding: 14px;
+        border-radius: 12px;
+        border: 2px solid var(--line);
+        background: var(--paper);
+        font-family: 'Nunito', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.18s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .yn-btn:hover { border-color: var(--blue-soft); background: var(--sky); }
+      .yn-btn.selected { border-color: var(--blue); background: var(--sky); color: var(--blue-dark); }
+      .yn-btn.yes.selected { border-color: #dc2626; background: #fff1f1; color: #991b1b; }
+
+      /* ── SLIDER ── */
+      .slider-wrap {
+        padding: 4px 0 8px;
+      }
+
+      .slider-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin-bottom: 8px;
+        font-weight: 700;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        -webkit-appearance: none;
+        height: 10px;
+        border-radius: 5px;
+        background: linear-gradient(to right, var(--blue) var(--fill, 50%), var(--line) var(--fill, 50%));
+        outline: none;
+        cursor: pointer;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--blue);
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(29,78,216,0.35);
+        cursor: pointer;
+      }
+
+      .slider-value {
+        text-align: center;
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: var(--blue-dark);
+        margin-top: 10px;
+      }
+
+      .slider-value span {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      /* ── NUMBER INPUT ── */
+      .num-input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        font-family: 'Nunito', sans-serif;
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--ink);
+        background: var(--paper);
+        outline: none;
+        transition: border-color 0.18s;
+        text-align: center;
+      }
+
+      .num-input:focus { border-color: var(--blue-soft); }
+
+      /* ── EMOJI SCALE ── */
+      .emoji-scale {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .emoji-btn {
+        flex: 1;
+        min-width: 50px;
+        padding: 10px 6px;
+        border-radius: 12px;
+        border: 2px solid var(--line);
+        background: var(--paper);
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.18s;
+        font-family: 'Nunito', sans-serif;
+      }
+
+      .emoji-btn .icon { font-size: 1.6rem; display: block; }
+      .emoji-btn .val { font-size: 0.75rem; color: var(--muted); font-weight: 700; }
+      .emoji-btn:hover { border-color: var(--blue-soft); background: var(--sky); }
+      .emoji-btn.selected { border-color: var(--blue); background: var(--sky); }
+
+      /* ── NAV BUTTONS ── */
+      .nav-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .btn-back {
+        padding: 14px 28px;
+        border-radius: 12px;
+        border: 2px solid var(--line);
+        background: white;
+        font-family: 'Nunito', sans-serif;
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+
+      .btn-back:hover { border-color: var(--blue-soft); color: var(--blue); }
+
+      .btn-next {
+        flex: 1;
+        padding: 16px 28px;
+        border-radius: 12px;
+        border: none;
+        background: var(--blue);
+        color: white;
+        font-family: 'Nunito', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-next:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(29,78,216,0.3); }
+      .btn-next:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+      /* ── CLINICAL BLOCK ── */
+      .clin-block {
+        background: var(--paper);
+        border: 2px solid var(--line);
+        border-radius: 14px;
+        margin-bottom: 16px;
+        overflow: hidden;
+        transition: border-color 0.2s;
+      }
+
+      .clin-block.skipped {
+        opacity: 0.55;
+        border-style: dashed;
+      }
+
+      .clin-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        background: white;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .clin-icon { font-size: 1.6rem; flex-shrink: 0; }
+
+      .clin-name {
+        font-weight: 900;
+        font-size: 1rem;
+        color: var(--ink);
+      }
+
+      .clin-fullname {
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .clin-badge {
+        margin-left: auto;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        background: var(--green-bg);
+        color: var(--green);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .clin-badge.amber { background: var(--amber-bg); color: var(--amber); }
+      .clin-badge.red { background: var(--red-bg); color: var(--red); }
+
+      .clin-body { padding: 16px; }
+
+      .range-bar-wrap { }
+
+      .range-zones {
+        display: flex;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 14px;
+        height: 42px;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .zone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+        text-align: center;
+        padding: 2px 4px;
+      }
+
+      .zone.red { background: #fee2e2; color: #991b1b; }
+      .zone.amber { background: var(--amber-bg); color: var(--amber); }
+      .zone.green { background: var(--green-bg); color: var(--green); }
+
+      .clin-score-display {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .clin-score-display strong {
+        font-size: 1.5rem;
+        color: var(--ink);
+      }
+
+      .clin-meaning {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      .skip-btn {
+        width: 100%;
+        background: none;
+        border: none;
+        border-top: 1px dashed var(--line);
+        padding: 10px 16px;
+        color: var(--muted);
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.18s;
+      }
+
+      .skip-btn:hover { background: var(--sky); color: var(--blue); }
+      .skip-btn.unskip { color: var(--blue); background: #eff6ff; }
+
+      /* CDR CARDS */
+      .cdr-cards {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+
+      .cdr-card {
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 6px;
+        background: var(--paper);
+        cursor: pointer;
+        text-align: center;
+        font-family: 'Nunito', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        transition: all 0.18s;
+      }
+
+      .cdr-card:hover { border-color: var(--blue-soft); background: var(--sky); }
+      .cdr-card.selected { border-color: var(--blue); background: var(--sky); }
+
+      .cdr-emoji { font-size: 1.5rem; }
+      .cdr-val { font-size: 1rem; font-weight: 900; color: var(--ink); }
+      .cdr-word { font-size: 0.78rem; font-weight: 800; color: var(--blue-dark); }
+      .cdr-desc { font-size: 0.7rem; color: var(--muted); line-height: 1.3; }
+
+      /* BIOMARKER TOGGLE */
+      .biomarker-toggle-wrap {
+        border: 2px dashed var(--line);
+        border-radius: 14px;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+
+      .biomarker-toggle {
+        width: 100%;
+        background: var(--paper);
+        border: none;
+        padding: 16px 18px;
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: var(--muted);
+        cursor: pointer;
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.18s;
+      }
+
+      .biomarker-toggle:hover { background: var(--sky); color: var(--blue); }
+      .toggle-arrow { font-size: 0.8rem; }
+
+      .biomarker-body { padding: 16px; background: white; border-top: 1px solid var(--line); }
+
+      .bio-intro {
+        font-size: 0.88rem;
+        color: var(--muted);
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+
+      .bio-row {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .bio-row:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+      .bio-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+
+      .bio-name {
+        font-weight: 900;
+        font-size: 0.95rem;
+        color: var(--ink);
+        margin-bottom: 3px;
+      }
+
+      .bio-tag {
+        background: #e0f2fe;
+        color: #0369a1;
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 50px;
+        margin-left: 6px;
+      }
+
+      .bio-hint {
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+
+      .bio-input-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .bio-input {
+        width: 120px;
+        padding: 10px 12px;
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        font-family: 'Nunito', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--ink);
+        text-align: center;
+        outline: none;
+        transition: border-color 0.18s;
+        background: var(--paper);
+      }
+
+      .bio-input:focus { border-color: var(--blue-soft); }
+
+      .bio-indicator {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--green);
+      }
+
+      .bio-indicator.concern { color: var(--red); }
+      .bio-indicator.mild { color: var(--amber); }
+
+      @media (max-width: 600px) {
+        .cdr-cards { grid-template-columns: repeat(3, 1fr); }
+        .cdr-card:nth-child(4), .cdr-card:nth-child(5) { }
+      }
+
+      /* ── DOCTOR SCORE NOTE ── */
+      .doctor-note {
+        background: var(--amber-bg);
+        border: 1px solid #f59e0b;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 0.9rem;
+        color: var(--amber);
+        font-weight: 600;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        margin-bottom: 22px;
+      }
+
+      /* ── RESULT PANEL ── */
+      #result-section {
+        display: none;
+      }
+
+      #result-section.visible { display: block; }
+
+      .result-hero {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 36px 28px;
+        text-align: center;
+        border: 1px solid var(--sky-mid);
+        margin-bottom: 20px;
+      }
+
+      .result-icon { font-size: 4rem; margin-bottom: 12px; }
+
+      .result-label {
+        font-family: 'Lora', serif;
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .result-label.low { color: var(--green); }
+      .result-label.moderate { color: var(--amber); }
+      .result-label.high { color: var(--red); }
+
+      .result-score {
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin: 10px 0;
+        line-height: 1;
+      }
+
+      .result-score.low { color: var(--green); }
+      .result-score.moderate { color: var(--amber); }
+      .result-score.high { color: var(--red); }
+
+      .result-summary {
+        font-size: 1.05rem;
+        color: var(--muted);
+        line-height: 1.6;
+        max-width: 540px;
+        margin: 16px auto 0;
+      }
+
+      /* ── GAUGE ── */
+      .gauge-wrap {
+        width: 160px;
+        height: 160px;
+        position: relative;
+        margin: 16px auto;
+      }
+
+      .gauge-wrap svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+      }
+
+      .gauge-track { fill: none; stroke: #e5e7eb; stroke-width: 14; }
+
+      .gauge-fill {
+        fill: none;
+        stroke-width: 14;
+        stroke-linecap: round;
+        stroke-dasharray: 301.59;
+        stroke-dashoffset: 301.59;
+        transition: stroke-dashoffset 600ms ease, stroke 600ms ease;
+      }
+
+      .gauge-num {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--ink);
+      }
+
+      /* ── FACTORS ── */
+      .factors-card {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px;
+        border: 1px solid var(--sky-mid);
+        margin-bottom: 20px;
+      }
+
+      .factors-title {
+        font-family: 'Lora', serif;
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--blue-dark);
+        margin-bottom: 6px;
+      }
+
+      .factors-sub {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+
+      .factor-item {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .factor-arrow {
+        font-size: 1.4rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      .factor-text strong {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--ink);
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      .factor-text p {
+        font-size: 0.9rem;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      /* ── DISCLAIMER ── */
+      .disclaimer-card {
+        background: #eff6ff;
+        border: 1px solid var(--sky-mid);
+        border-radius: var(--radius);
+        padding: 20px 24px;
+        margin-bottom: 20px;
+        font-size: 0.92rem;
+        color: var(--blue-dark);
+        line-height: 1.55;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      /* ── ACTION BUTTONS ── */
+      .action-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .btn-report {
+        flex: 1;
+        min-width: 200px;
+        padding: 16px 24px;
+        border-radius: 12px;
+        border: none;
+        background: var(--blue);
+        color: white;
+        font-family: 'Nunito', sans-serif;
+        font-size: 1rem;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-report:hover { background: var(--blue-dark); transform: translateY(-1px); }
+      .btn-report:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+      .btn-restart {
+        padding: 16px 24px;
+        border-radius: 12px;
+        border: 2px solid var(--line);
+        background: white;
+        font-family: 'Nunito', sans-serif;
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+
+      .btn-restart:hover { border-color: var(--blue-soft); color: var(--blue); }
+
+      /* ── LOADING ── */
+      .loading-card {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 60px 28px;
+        text-align: center;
+        border: 1px solid var(--sky-mid);
+      }
+
+      .spinner {
+        width: 56px;
+        height: 56px;
+        border: 6px solid var(--sky-mid);
+        border-top-color: var(--blue);
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .loading-text {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--blue-dark);
+      }
+
+      /* ── ERROR ── */
+      .error-card {
+        background: var(--red-bg);
+        border: 1px solid #f87171;
+        border-radius: var(--radius);
+        padding: 24px 28px;
+        text-align: center;
+        display: none;
+      }
+
+      .error-card.visible { display: block; }
+      .error-card p { color: var(--red); font-weight: 700; font-size: 1rem; }
+
+      /* ── SAMPLE BUTTON ── */
+      .sample-row {
+        text-align: center;
+        margin-top: 12px;
+      }
+
+      .btn-sample {
+        background: none;
+        border: 1px dashed var(--muted);
+        border-radius: 8px;
+        padding: 8px 20px;
+        color: var(--muted);
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+
+      .btn-sample:hover { border-color: var(--blue-soft); color: var(--blue); }
+
+      @media (max-width: 600px) {
+        .section-card, .factors-card, .result-hero { padding: 20px 16px; }
+        .action-row { flex-direction: column; }
+        .btn-report, .btn-restart { width: 100%; }
+      }
+    </style>
   </head>
   <body>
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Explainable AI screening</p>
-        <h1>Early-stage dementia risk check</h1>
-        <p class="lede">Use clinical scores, daily behavior, history, and optional biomarkers to estimate risk and see which indicators influenced the result.</p>
+
+    <!-- HEADER -->
+    <header class="header">
+      <span class="header-icon">🧠</span>
+      <h1>Memory Health Check</h1>
+      <p id="header-desc">Answer a few simple questions to check your memory health. This takes about 5 minutes.</p>
+      <div class="who-selector">
+        <button class="who-btn active" data-who="self" onclick="setWho('self', this)">👤 I am checking myself</button>
+        <button class="who-btn" data-who="caregiver" onclick="setWho('caregiver', this)">👨‍👩‍👧 I am checking someone else</button>
+        <button class="who-btn" data-who="doctor" onclick="setWho('doctor', this)">🩺 I am a doctor / nurse</button>
       </div>
-      <img
-        src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=640&q=80"
-        alt="Clinician reviewing health notes"
-      />
     </header>
 
-    <main class="layout">
-      <form id="screening-form" class="panel">
-        <div class="section-heading">
-          <span>Step 1</span>
-          <h2>Who is completing this?</h2>
-        </div>
-        <div class="choice-row" role="radiogroup" aria-label="Respondent">
-          <label><input type="radio" name="respondent" value="Patient" checked /> Patient</label>
-          <label><input type="radio" name="respondent" value="Caregiver" /> Caregiver</label>
-          <label><input type="radio" name="respondent" value="Clinician" /> Clinician</label>
+    <!-- PROGRESS -->
+    <div class="progress-bar-wrap">
+      <div class="progress-steps" id="progress-dots"></div>
+      <div class="step-label" id="step-label">Step 1 of 4</div>
+    </div>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- SECTION 1: BASIC INFO -->
+      <div class="section-card visible" id="section-1">
+        <div class="section-num">1</div>
+        <h2 class="section-title" id="s1-title">Basic Information</h2>
+        <p class="section-desc" id="s1-desc">Let's start with some basic details. Don't worry — there are no wrong answers.</p>
+
+        <div class="question">
+          <label class="q-label" id="age-label">How old are you?</label>
+          <p class="q-hint">Type your age in years</p>
+          <input type="number" class="num-input" id="f-age" min="45" max="100" value="68" />
         </div>
 
-        <div class="section-heading">
-          <span>Step 2</span>
-          <h2 id="form-title">Tell us about your screening indicators</h2>
+        <div class="question">
+          <label class="q-label">How many years did you go to school?</label>
+          <p class="q-hint">Count all years of study — school, college, university</p>
+          <input type="number" class="num-input" id="f-education" min="0" max="25" value="12" />
         </div>
 
-        <div class="grid two">
-          <label>Age <input name="age" type="number" min="45" max="100" value="68" /></label>
-          <label>Years of education <input name="education_years" type="number" min="0" max="25" value="12" /></label>
-          <label>Family history
-            <select name="family_history">
-              <option value="0">No</option>
-              <option value="1">Yes</option>
-            </select>
-          </label>
-          <label>APOE-e4 carrier
-            <select name="apoe4">
-              <option value="0">No or unknown</option>
-              <option value="1">Yes</option>
-            </select>
-          </label>
+        <div class="question">
+          <label class="q-label" id="fh-label">Has anyone in your close family had dementia or Alzheimer's?</label>
+          <p class="q-hint">Close family means parents, brothers, or sisters</p>
+          <div class="yn-group">
+            <button class="yn-btn selected" data-val="0" onclick="selectYN(this, 'family_history')">✅ No</button>
+            <button class="yn-btn yes" data-val="1" onclick="selectYN(this, 'family_history')">⚠️ Yes</button>
+          </div>
+          <input type="hidden" id="f-family_history" value="0" />
         </div>
 
-        <div class="section-heading compact">
-          <span>Clinical</span>
-          <h2>Screening scores</h2>
+        <div class="nav-row">
+          <button class="btn-next" onclick="goNext(1)">Next: Daily Life →</button>
         </div>
-        <div class="grid three">
-          <label>MMSE score <input name="mmse" type="number" min="0" max="30" step="0.5" value="27" /></label>
-          <label>MoCA score <input name="moca" type="number" min="0" max="30" step="0.5" value="25" /></label>
-          <label>CDR score
-            <select name="cdr">
-              <option value="0">0</option>
-              <option value="0.5">0.5</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-            </select>
-          </label>
+        <div class="sample-row">
+          <button class="btn-sample" onclick="loadHighRiskSample()">📋 Load example answers (high-risk)</button>
+        </div>
+      </div>
+
+      <!-- SECTION 2: DAILY LIFE -->
+      <div class="section-card" id="section-2">
+        <div class="section-num">2</div>
+        <h2 class="section-title" id="s2-title">Daily Life & Behaviour</h2>
+        <p class="section-desc" id="s2-desc">How have things been going day to day? Rate each area from 0 (very poor) to 10 (excellent).</p>
+
+        <!-- Memory Recall -->
+        <div class="question">
+          <label class="q-label" id="mem-label">How well do you remember things from the past few days?</label>
+          <p class="q-hint">For example: remembering what you had for breakfast, or a recent conversation</p>
+          <div class="slider-wrap">
+            <div class="slider-labels"><span>😟 Very poor</span><span>😐 Okay</span><span>😊 Excellent</span></div>
+            <input type="range" id="f-memory_recall" min="0" max="10" step="0.5" value="8" oninput="updateSlider(this)" />
+            <div class="slider-value" id="sv-memory_recall">8 <span>/ 10</span></div>
+          </div>
         </div>
 
-        <div class="section-heading compact">
-          <span>Behavior</span>
-          <h2 id="behavior-title">Daily changes</h2>
-        </div>
-        <div class="grid three">
-          <label>Memory recall <input name="memory_recall" type="number" min="0" max="10" step="0.5" value="8" /></label>
-          <label>Orientation <input name="orientation" type="number" min="0" max="10" step="0.5" value="9" /></label>
-          <label>Daily function <input name="daily_function" type="number" min="0" max="10" step="0.5" value="8" /></label>
-          <label>Mood change <input name="mood_change" type="number" min="0" max="10" step="0.5" value="2" /></label>
-          <label>Sleep quality <input name="sleep_quality" type="number" min="0" max="10" step="0.5" value="7" /></label>
-          <label>Medication adherence <input name="medication_adherence" type="number" min="0" max="10" step="0.5" value="8" /></label>
-          <label>Wandering or getting lost
-            <select name="wandering">
-              <option value="0">No</option>
-              <option value="1">Yes</option>
-            </select>
-          </label>
-          <label>Hypertension
-            <select name="hypertension">
-              <option value="0">No</option>
-              <option value="1">Yes</option>
-            </select>
-          </label>
-          <label>Diabetes
-            <select name="diabetes">
-              <option value="0">No</option>
-              <option value="1">Yes</option>
-            </select>
-          </label>
+        <!-- Orientation -->
+        <div class="question">
+          <label class="q-label" id="ori-label">Do you feel confused about where you are or what day it is?</label>
+          <p class="q-hint">Rate how well you know today's date, the place you are in, and what time it is</p>
+          <div class="slider-wrap">
+            <div class="slider-labels"><span>😟 Very confused</span><span>😐 Sometimes</span><span>😊 Always clear</span></div>
+            <input type="range" id="f-orientation" min="0" max="10" step="0.5" value="9" oninput="updateSlider(this)" />
+            <div class="slider-value" id="sv-orientation">9 <span>/ 10</span></div>
+          </div>
         </div>
 
-        <div class="section-heading compact">
-          <span>Optional</span>
-          <h2>Biomarkers</h2>
-        </div>
-        <div class="grid two">
-          <label>CSF amyloid-beta <input name="amyloid_beta" type="number" min="200" max="1500" value="900" /></label>
-          <label>CSF tau <input name="tau" type="number" min="50" max="1000" value="300" /></label>
+        <!-- Daily Function -->
+        <div class="question">
+          <label class="q-label" id="dfn-label">How well do you manage daily tasks on your own?</label>
+          <p class="q-hint">Examples: cooking, shopping, paying bills, using phone</p>
+          <div class="slider-wrap">
+            <div class="slider-labels"><span>😟 Need a lot of help</span><span>😐 Some help</span><span>😊 Fully independent</span></div>
+            <input type="range" id="f-daily_function" min="0" max="10" step="0.5" value="8" oninput="updateSlider(this)" />
+            <div class="slider-value" id="sv-daily_function">8 <span>/ 10</span></div>
+          </div>
         </div>
 
-        <div class="actions">
-          <button type="submit">Calculate risk</button>
-          <button type="button" id="sample-high" class="secondary">Use high-risk sample</button>
-          <button type="reset" class="ghost">Reset</button>
+        <!-- Mood Change -->
+        <div class="question">
+          <label class="q-label" id="mood-label">Have you noticed changes in mood or behaviour recently?</label>
+          <p class="q-hint">Examples: feeling more anxious, sad, irritable, or withdrawn than usual</p>
+          <div class="slider-wrap">
+            <div class="slider-labels"><span>😊 No change</span><span>😐 Mild change</span><span>😟 Strong change</span></div>
+            <input type="range" id="f-mood_change" min="0" max="10" step="0.5" value="2" oninput="updateSlider(this)" />
+            <div class="slider-value" id="sv-mood_change">2 <span>/ 10</span></div>
+          </div>
         </div>
-      </form>
 
-      <aside class="panel result-panel" aria-live="polite">
-        <div class="section-heading">
-          <span>Result</span>
-          <h2 id="risk-label">Awaiting screening</h2>
+        <!-- Sleep -->
+        <div class="question">
+          <label class="q-label" id="slp-label">How is your sleep?</label>
+          <p class="q-hint">Rate your usual quality of sleep at night</p>
+          <div class="slider-wrap">
+            <div class="slider-labels"><span>😟 Very poor</span><span>😐 Okay</span><span>😊 Very good</span></div>
+            <input type="range" id="f-sleep_quality" min="0" max="10" step="0.5" value="7" oninput="updateSlider(this)" />
+            <div class="slider-value" id="sv-sleep_quality">7 <span>/ 10</span></div>
+          </div>
         </div>
-        <div class="gauge" aria-label="High-risk probability">
-          <svg viewBox="0 0 120 120" role="img">
-            <circle class="track" cx="60" cy="60" r="48"></circle>
-            <circle class="progress" id="gauge-progress" cx="60" cy="60" r="48"></circle>
-          </svg>
-          <strong id="risk-score">0%</strong>
+
+        <!-- Medication -->
+        <div class="question">
+          <label class="q-label" id="med-label">How well do you keep up with taking medicines on time?</label>
+          <p class="q-hint">If you don't take any medicines, rate this as 10</p>
+          <div class="slider-wrap">
+            <div class="slider-labels"><span>😟 Often forget</span><span>😐 Sometimes</span><span>😊 Always on time</span></div>
+            <input type="range" id="f-medication_adherence" min="0" max="10" step="0.5" value="8" oninput="updateSlider(this)" />
+            <div class="slider-value" id="sv-medication_adherence">8 <span>/ 10</span></div>
+          </div>
         </div>
-        <p id="summary" class="summary">Enter the available indicators and calculate a screening result.</p>
 
-        <div class="probabilities" id="probabilities"></div>
+        <!-- Wandering -->
+        <div class="question">
+          <label class="q-label" id="wand-label">Have you ever got lost or wandered in a familiar place?</label>
+          <p class="q-hint">For example: forgetting how to get home from a nearby shop</p>
+          <div class="yn-group">
+            <button class="yn-btn selected" data-val="0" onclick="selectYN(this, 'wandering')">✅ No, never</button>
+            <button class="yn-btn yes" data-val="1" onclick="selectYN(this, 'wandering')">⚠️ Yes, this has happened</button>
+          </div>
+          <input type="hidden" id="f-wandering" value="0" />
+        </div>
 
-        <h3>Top contributing factors</h3>
-        <div id="factors" class="factors"></div>
+        <div class="nav-row">
+          <button class="btn-back" onclick="goBack(2)">← Back</button>
+          <button class="btn-next" onclick="goNext(2)">Next: Health History →</button>
+        </div>
+      </div>
 
-        <button type="button" id="report-button" disabled>Download PDF report</button>
-        <p class="small">This tool supports screening conversations. It does not provide a medical diagnosis.</p>
-      </aside>
+      <!-- SECTION 3: HEALTH HISTORY -->
+      <div class="section-card" id="section-3">
+        <div class="section-num">3</div>
+        <h2 class="section-title">Health Conditions</h2>
+        <p class="section-desc">Do you have any of these health conditions? They can affect brain health over time.</p>
+
+        <div class="question">
+          <label class="q-label">Do you have high blood pressure (hypertension)?</label>
+          <p class="q-hint">Has a doctor ever told you that you have high blood pressure?</p>
+          <div class="yn-group">
+            <button class="yn-btn selected" data-val="0" onclick="selectYN(this, 'hypertension')">✅ No</button>
+            <button class="yn-btn yes" data-val="1" onclick="selectYN(this, 'hypertension')">⚠️ Yes</button>
+          </div>
+          <input type="hidden" id="f-hypertension" value="0" />
+        </div>
+
+        <div class="question">
+          <label class="q-label">Do you have diabetes?</label>
+          <p class="q-hint">Has a doctor ever told you that you have diabetes or high blood sugar?</p>
+          <div class="yn-group">
+            <button class="yn-btn selected" data-val="0" onclick="selectYN(this, 'diabetes')">✅ No</button>
+            <button class="yn-btn yes" data-val="1" onclick="selectYN(this, 'diabetes')">⚠️ Yes</button>
+          </div>
+          <input type="hidden" id="f-diabetes" value="0" />
+        </div>
+
+        <div class="question">
+          <label class="q-label">Do you know if you carry the APOE-e4 gene?</label>
+          <p class="q-hint">This is a gene test done by doctors. If you are not sure, choose "No / Not sure".</p>
+          <div class="yn-group">
+            <button class="yn-btn selected" data-val="0" onclick="selectYN(this, 'apoe4')">✅ No / Not sure</button>
+            <button class="yn-btn yes" data-val="1" onclick="selectYN(this, 'apoe4')">⚠️ Yes, I carry it</button>
+          </div>
+          <input type="hidden" id="f-apoe4" value="0" />
+        </div>
+
+        <div class="nav-row">
+          <button class="btn-back" onclick="goBack(3)">← Back</button>
+          <button class="btn-next" onclick="goNext(3)">Next: Doctor's Scores →</button>
+        </div>
+      </div>
+
+      <!-- SECTION 4: CLINICAL SCORES (SIMPLIFIED) -->
+      <div class="section-card" id="section-4">
+        <div class="section-num">4</div>
+        <h2 class="section-title">Doctor's Test Scores</h2>
+        <p class="section-desc">Has a doctor given you any of these test results? If yes, move the slider to your score. If not, just skip — it's completely fine!</p>
+
+        <div class="doctor-note">
+          <span>💡</span>
+          <span><strong>Don't have these scores?</strong> That's okay! Just tap "Skip — I don't have this score" under each test and move on.</span>
+        </div>
+
+        <!-- MMSE -->
+        <div class="clin-block" id="block-mmse">
+          <div class="clin-header">
+            <div class="clin-icon">📋</div>
+            <div>
+              <div class="clin-name">Memory Test 1 — MMSE</div>
+              <div class="clin-fullname">Mini Mental State Examination</div>
+            </div>
+            <div class="clin-badge" id="badge-mmse">Normal</div>
+          </div>
+          <div class="clin-body" id="body-mmse">
+            <div class="range-bar-wrap">
+              <div class="range-zones">
+                <span class="zone red" style="width:27%">⚠️ Concern<br><small>0–17</small></span>
+                <span class="zone amber" style="width:23%">🤔 Mild<br><small>18–23</small></span>
+                <span class="zone green" style="width:50%">✅ Normal<br><small>24–30</small></span>
+              </div>
+              <input type="range" id="f-mmse" min="0" max="30" step="1" value="27" oninput="updateClinSlider('mmse', this.value)" />
+              <div class="clin-score-display">
+                Your score: <strong id="disp-mmse">27</strong> / 30
+                <span class="clin-meaning" id="mean-mmse">✅ This is in the normal range</span>
+              </div>
+            </div>
+          </div>
+          <button class="skip-btn" id="skip-mmse" onclick="toggleSkip('mmse', 27)">Skip — I don't have this score</button>
+        </div>
+
+        <!-- MoCA -->
+        <div class="clin-block" id="block-moca">
+          <div class="clin-header">
+            <div class="clin-icon">🧩</div>
+            <div>
+              <div class="clin-name">Memory Test 2 — MoCA</div>
+              <div class="clin-fullname">Montreal Cognitive Assessment</div>
+            </div>
+            <div class="clin-badge" id="badge-moca">Normal</div>
+          </div>
+          <div class="clin-body" id="body-moca">
+            <div class="range-bar-wrap">
+              <div class="range-zones">
+                <span class="zone red" style="width:43%">⚠️ Concern<br><small>0–17</small></span>
+                <span class="zone amber" style="width:27%">🤔 Mild<br><small>18–25</small></span>
+                <span class="zone green" style="width:30%">✅ Normal<br><small>26–30</small></span>
+              </div>
+              <input type="range" id="f-moca" min="0" max="30" step="1" value="25" oninput="updateClinSlider('moca', this.value)" />
+              <div class="clin-score-display">
+                Your score: <strong id="disp-moca">25</strong> / 30
+                <span class="clin-meaning" id="mean-moca">🤔 Slightly below normal — worth discussing with a doctor</span>
+              </div>
+            </div>
+          </div>
+          <button class="skip-btn" id="skip-moca" onclick="toggleSkip('moca', 25)">Skip — I don't have this score</button>
+        </div>
+
+        <!-- CDR -->
+        <div class="clin-block" id="block-cdr">
+          <div class="clin-header">
+            <div class="clin-icon">🩺</div>
+            <div>
+              <div class="clin-name">Doctor's Rating — CDR</div>
+              <div class="clin-fullname">Clinical Dementia Rating</div>
+            </div>
+            <div class="clin-badge green" id="badge-cdr">No concern</div>
+          </div>
+          <div class="clin-body" id="body-cdr">
+            <p style="font-size:0.9rem;color:var(--muted);margin-bottom:14px;">Your doctor may have given you one of these ratings. Tap the one that matches.</p>
+            <div class="cdr-cards" id="cdr-scale">
+              <button class="cdr-card selected" data-val="0" onclick="selectCDR(this, 0)">
+                <span class="cdr-emoji">😊</span>
+                <span class="cdr-val">0</span>
+                <span class="cdr-word">No Problem</span>
+                <span class="cdr-desc">Memory and thinking are normal</span>
+              </button>
+              <button class="cdr-card" data-val="0.5" onclick="selectCDR(this, 0.5)">
+                <span class="cdr-emoji">🤔</span>
+                <span class="cdr-val">0.5</span>
+                <span class="cdr-word">Very Mild</span>
+                <span class="cdr-desc">Slight forgetfulness noticed</span>
+              </button>
+              <button class="cdr-card" data-val="1" onclick="selectCDR(this, 1)">
+                <span class="cdr-emoji">😟</span>
+                <span class="cdr-val">1</span>
+                <span class="cdr-word">Mild</span>
+                <span class="cdr-desc">Memory loss affects daily life</span>
+              </button>
+              <button class="cdr-card" data-val="2" onclick="selectCDR(this, 2)">
+                <span class="cdr-emoji">😨</span>
+                <span class="cdr-val">2</span>
+                <span class="cdr-word">Moderate</span>
+                <span class="cdr-desc">Needs help with many tasks</span>
+              </button>
+              <button class="cdr-card" data-val="3" onclick="selectCDR(this, 3)">
+                <span class="cdr-emoji">🆘</span>
+                <span class="cdr-val">3</span>
+                <span class="cdr-word">Severe</span>
+                <span class="cdr-desc">Needs full-time care</span>
+              </button>
+            </div>
+          </div>
+          <input type="hidden" id="f-cdr" value="0" />
+          <button class="skip-btn" id="skip-cdr" onclick="toggleSkip('cdr', 0)">Skip — I don't have this rating</button>
+        </div>
+
+        <!-- BIOMARKERS collapsed toggle -->
+        <div class="biomarker-toggle-wrap">
+          <button class="biomarker-toggle" onclick="toggleBiomarkers(this)">
+            🔬 I have blood/fluid test results from a specialist (optional) <span class="toggle-arrow">▼</span>
+          </button>
+          <div class="biomarker-body" id="biomarker-body" style="display:none">
+            <p class="bio-intro">These are special lab tests done in hospitals. Most people won't have these. If you do, enter the values below.</p>
+
+            <div class="bio-row">
+              <div class="bio-icon">🧬</div>
+              <div class="bio-content">
+                <div class="bio-name">Amyloid Beta <span class="bio-tag">CSF test</span></div>
+                <div class="bio-hint">Normal level is around 900 or above. Lower can mean more concern.</div>
+                <div class="bio-input-row">
+                  <input type="number" class="bio-input" id="f-amyloid_beta" min="200" max="1500" value="900" oninput="updateBioDisplay('amyloid_beta')" />
+                  <div class="bio-indicator" id="bio-ind-amyloid_beta">✅ Normal range</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bio-row">
+              <div class="bio-icon">🔩</div>
+              <div class="bio-content">
+                <div class="bio-name">Tau Protein <span class="bio-tag">CSF test</span></div>
+                <div class="bio-hint">Normal level is below 300. Higher can mean nerve cell damage.</div>
+                <div class="bio-input-row">
+                  <input type="number" class="bio-input" id="f-tau" min="50" max="1000" value="300" oninput="updateBioDisplay('tau')" />
+                  <div class="bio-indicator" id="bio-ind-tau">✅ Normal range</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-row">
+          <button class="btn-back" onclick="goBack(4)">← Back</button>
+          <button class="btn-next" onclick="submitForm()">🔍 Check My Memory Health</button>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div class="section-card" id="section-loading">
+        <div class="loading-card">
+          <div class="spinner"></div>
+          <p class="loading-text">Analysing your answers…</p>
+        </div>
+      </div>
+
+      <!-- ERROR -->
+      <div class="error-card" id="error-card">
+        <p>⚠️ <span id="error-msg">Something went wrong. Please try again.</span></p>
+      </div>
+
+      <!-- RESULT -->
+      <div id="result-section">
+        <div class="result-hero">
+          <div class="result-icon" id="result-icon">🟢</div>
+          <div class="result-label" id="result-label">Low Risk</div>
+          <div class="gauge-wrap">
+            <svg viewBox="0 0 120 120">
+              <circle class="gauge-track" cx="60" cy="60" r="48"></circle>
+              <circle class="gauge-fill" id="gauge-fill" cx="60" cy="60" r="48"></circle>
+            </svg>
+            <div class="gauge-num" id="gauge-num">0%</div>
+          </div>
+          <p class="result-summary" id="result-summary"></p>
+        </div>
+
+        <div class="factors-card">
+          <h3 class="factors-title">What influenced this result?</h3>
+          <p class="factors-sub">These are the most important factors from your answers, from most to least influential.</p>
+          <div id="factors-list"></div>
+        </div>
+
+        <div class="disclaimer-card">
+          <span>🩺</span>
+          <span><strong>Important:</strong> This is a screening tool only — not a medical diagnosis. If you have concerns about memory, please speak with a doctor. Early professional advice is always the best step.</span>
+        </div>
+
+        <div class="action-row">
+          <button class="btn-report" id="report-btn" onclick="downloadReport()">📄 Download Full Report (PDF)</button>
+          <button class="btn-restart" onclick="restartForm()">🔄 Start Over</button>
+        </div>
+      </div>
+
     </main>
 
-    <script src="/app.js"></script>
+    <script>
+      // ── STATE ──
+      let who = 'self';
+      let currentSection = 1;
+      const TOTAL_SECTIONS = 4;
+      let lastResult = null;
+
+      // ── WHO SELECTOR ──
+      function setWho(type, btn) {
+        who = type;
+        document.querySelectorAll('.who-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateLanguage();
+      }
+
+      function updateLanguage() {
+        const isCaregiver = who === 'caregiver';
+        const isDoctor = who === 'doctor';
+
+        document.getElementById('header-desc').textContent = isCaregiver
+          ? 'Answer a few simple questions about the person you care for. This takes about 5 minutes.'
+          : isDoctor
+          ? 'Enter the patient\'s clinical and behavioural indicators to estimate dementia risk.'
+          : 'Answer a few simple questions to check your memory health. This takes about 5 minutes.';
+
+        document.getElementById('s1-title').textContent = isDoctor ? 'Patient Information' : 'Basic Information';
+        document.getElementById('s1-desc').textContent = isCaregiver
+          ? 'Let\'s start with some basic details about the person you are supporting.'
+          : isDoctor
+          ? 'Enter the patient\'s demographic details.'
+          : 'Let\'s start with some basic details. Don\'t worry — there are no wrong answers.';
+
+        document.getElementById('age-label').textContent = isCaregiver ? 'How old are they?' : isDoctor ? 'Patient age' : 'How old are you?';
+        document.getElementById('fh-label').textContent = isCaregiver ? 'Has anyone in their close family had dementia or Alzheimer\'s?' : 'Has anyone in your close family had dementia or Alzheimer\'s?';
+
+        document.getElementById('s2-title').textContent = isDoctor ? 'Behavioural Indicators' : 'Daily Life & Behaviour';
+        document.getElementById('s2-desc').textContent = isCaregiver
+          ? 'Rate each area for the person you care for, from 0 (very poor) to 10 (excellent).'
+          : isDoctor
+          ? 'Rate the patient\'s observed behavioural indicators from 0 to 10.'
+          : 'How have things been going day to day? Rate each area from 0 (very poor) to 10 (excellent).';
+
+        document.getElementById('mem-label').textContent = isCaregiver ? 'How well do they remember things from the past few days?' : isDoctor ? 'Memory recall score (0–10)' : 'How well do you remember things from the past few days?';
+        document.getElementById('ori-label').textContent = isCaregiver ? 'Do they seem confused about where they are or what day it is?' : isDoctor ? 'Orientation score (0–10)' : 'Do you feel confused about where you are or what day it is?';
+        document.getElementById('dfn-label').textContent = isCaregiver ? 'How well do they manage daily tasks on their own?' : isDoctor ? 'Daily function score (0–10)' : 'How well do you manage daily tasks on your own?';
+        document.getElementById('mood-label').textContent = isCaregiver ? 'Have you noticed changes in their mood or behaviour?' : isDoctor ? 'Mood change severity (0–10)' : 'Have you noticed changes in mood or behaviour recently?';
+        document.getElementById('slp-label').textContent = isCaregiver ? 'How is their sleep?' : isDoctor ? 'Sleep quality score (0–10)' : 'How is your sleep?';
+        document.getElementById('med-label').textContent = isCaregiver ? 'How well do they keep up with taking medicines on time?' : isDoctor ? 'Medication adherence score (0–10)' : 'How well do you keep up with taking medicines on time?';
+        document.getElementById('wand-label').textContent = isCaregiver ? 'Have they ever got lost or wandered in a familiar place?' : isDoctor ? 'Wandering / getting lost' : 'Have you ever got lost or wandered in a familiar place?';
+      }
+
+      // ── PROGRESS DOTS ──
+      function renderProgress() {
+        const wrap = document.getElementById('progress-dots');
+        wrap.innerHTML = '';
+        for (let i = 1; i <= TOTAL_SECTIONS; i++) {
+          const d = document.createElement('div');
+          d.className = 'step-dot' + (i < currentSection ? ' done' : i === currentSection ? ' current' : '');
+          wrap.appendChild(d);
+        }
+        document.getElementById('step-label').textContent = `Step ${Math.min(currentSection, TOTAL_SECTIONS)} of ${TOTAL_SECTIONS}`;
+      }
+
+      // ── NAV ──
+      function showSection(n) {
+        document.querySelectorAll('.section-card').forEach(c => c.classList.remove('visible'));
+        const el = document.getElementById('section-' + n);
+        if (el) el.classList.add('visible');
+        currentSection = n;
+        renderProgress();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function goNext(from) {
+        showSection(from + 1);
+      }
+
+      function goBack(from) {
+        showSection(from - 1);
+      }
+
+      // ── SLIDER ──
+      function updateSlider(input) {
+        const val = parseFloat(input.value);
+        const pct = (val / 10) * 100;
+        input.style.setProperty('--fill', pct + '%');
+        document.getElementById('sv-' + input.id.replace('f-', '')).innerHTML = val + ' <span>/ 10</span>';
+      }
+
+      // Initialise sliders (only 0–10 behavioral sliders that have a sv- display element)
+      document.querySelectorAll('input[type="range"]').forEach(function(input) {
+        var svId = 'sv-' + input.id.replace('f-', '');
+        if (document.getElementById(svId)) updateSlider(input);
+      });
+
+      // ── CLINICAL SCORE SLIDERS ──
+      const clinConfig = {
+        mmse: {
+          thresholds: [17, 23],
+          meanings: ['⚠️ This score suggests significant concern', '🤔 Slightly below normal — worth discussing with a doctor', '✅ This is in the normal range'],
+          badges: ['red', 'amber', ''],
+          badgeTexts: ['Needs attention', 'Mild concern', 'Normal']
+        },
+        moca: {
+          thresholds: [17, 25],
+          meanings: ['⚠️ This score suggests significant concern', '🤔 Slightly below normal — worth discussing with a doctor', '✅ This is in the normal range'],
+          badges: ['red', 'amber', ''],
+          badgeTexts: ['Needs attention', 'Mild concern', 'Normal']
+        }
+      };
+
+      function updateClinSlider(field, val) {
+        val = parseFloat(val);
+        document.getElementById('disp-' + field).textContent = val;
+        const cfg = clinConfig[field];
+        const level = val <= cfg.thresholds[0] ? 0 : val <= cfg.thresholds[1] ? 1 : 2;
+        document.getElementById('mean-' + field).textContent = cfg.meanings[level];
+
+        const badge = document.getElementById('badge-' + field);
+        badge.textContent = cfg.badgeTexts[level];
+        badge.className = 'clin-badge ' + cfg.badges[level];
+
+        // Update slider gradient fill
+        const input = document.getElementById('f-' + field);
+        const pct = (val / 30) * 100;
+        input.style.setProperty('--fill', pct + '%');
+      }
+
+      // Init clinical sliders
+      updateClinSlider('mmse', 27);
+      updateClinSlider('moca', 25);
+
+      // ── SKIP TOGGLE ──
+      const skipDefaults = { mmse: 27, moca: 25, cdr: 0 };
+      const skippedFields = {};
+
+      function toggleSkip(field, defaultVal) {
+        const block = document.getElementById('block-' + field);
+        const body = document.getElementById('body-' + field);
+        const btn = document.getElementById('skip-' + field);
+
+        if (!skippedFields[field]) {
+          skippedFields[field] = true;
+          block.classList.add('skipped');
+          if (body) body.style.display = 'none';
+          btn.textContent = '↩ I have this score — tap to enter it';
+          btn.classList.add('unskip');
+          // Reset to default
+          const input = document.getElementById('f-' + field);
+          if (input) input.value = defaultVal;
+        } else {
+          skippedFields[field] = false;
+          block.classList.remove('skipped');
+          if (body) body.style.display = '';
+          btn.textContent = 'Skip — I don\'t have this ' + (field === 'cdr' ? 'rating' : 'score');
+          btn.classList.remove('unskip');
+        }
+      }
+
+      // ── BIOMARKER TOGGLE ──
+      function toggleBiomarkers(btn) {
+        const body = document.getElementById('biomarker-body');
+        const arrow = btn.querySelector('.toggle-arrow');
+        if (body.style.display === 'none') {
+          body.style.display = 'block';
+          arrow.textContent = '▲';
+        } else {
+          body.style.display = 'none';
+          arrow.textContent = '▼';
+        }
+      }
+
+      function updateBioDisplay(field) {
+        const val = parseFloat(document.getElementById('f-' + field).value);
+        const ind = document.getElementById('bio-ind-' + field);
+        if (field === 'amyloid_beta') {
+          if (val < 500) { ind.textContent = '⚠️ Low — may indicate concern'; ind.className = 'bio-indicator concern'; }
+          else if (val < 750) { ind.textContent = '🤔 Mildly low'; ind.className = 'bio-indicator mild'; }
+          else { ind.textContent = '✅ Normal range'; ind.className = 'bio-indicator'; }
+        } else if (field === 'tau') {
+          if (val > 500) { ind.textContent = '⚠️ High — may indicate concern'; ind.className = 'bio-indicator concern'; }
+          else if (val > 300) { ind.textContent = '🤔 Slightly elevated'; ind.className = 'bio-indicator mild'; }
+          else { ind.textContent = '✅ Normal range'; ind.className = 'bio-indicator'; }
+        }
+      }
+
+      // ── YES/NO ──
+      function selectYN(btn, field) {
+        const group = btn.closest('.yn-group');
+        group.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('f-' + field).value = btn.dataset.val;
+      }
+
+      // ── CDR ──
+      function selectCDR(btn, val) {
+        document.querySelectorAll('#cdr-scale .cdr-card').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('f-cdr').value = val;
+      }
+
+      // ── COLLECT PAYLOAD ──
+      function getPayload() {
+        const whoMap = { self: 'Patient', caregiver: 'Caregiver', doctor: 'Clinician' };
+        return {
+          respondent: whoMap[who] || 'Patient',
+          age: +document.getElementById('f-age').value,
+          education_years: +document.getElementById('f-education').value,
+          family_history: +document.getElementById('f-family_history').value,
+          apoe4: +document.getElementById('f-apoe4').value,
+          mmse: +document.getElementById('f-mmse').value,
+          moca: +document.getElementById('f-moca').value,
+          cdr: +document.getElementById('f-cdr').value,
+          memory_recall: +document.getElementById('f-memory_recall').value,
+          orientation: +document.getElementById('f-orientation').value,
+          daily_function: +document.getElementById('f-daily_function').value,
+          mood_change: +document.getElementById('f-mood_change').value,
+          sleep_quality: +document.getElementById('f-sleep_quality').value,
+          wandering: +document.getElementById('f-wandering').value,
+          medication_adherence: +document.getElementById('f-medication_adherence').value,
+          hypertension: +document.getElementById('f-hypertension').value,
+          diabetes: +document.getElementById('f-diabetes').value,
+          amyloid_beta: +document.getElementById('f-amyloid_beta').value,
+          tau: +document.getElementById('f-tau').value,
+        };
+      }
+
+      // ── SUBMIT ──
+      async function submitForm() {
+        document.querySelectorAll('.section-card').forEach(c => c.classList.remove('visible'));
+        document.getElementById('section-loading').classList.add('visible');
+        document.getElementById('error-card').classList.remove('visible');
+        document.getElementById('result-section').classList.remove('visible');
+        currentSection = 5;
+        renderProgress();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const payload = getPayload();
+        try {
+          const res = await fetch('/api/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Request failed');
+          lastResult = data;
+          showResult(data);
+        } catch (err) {
+          document.getElementById('section-loading').classList.remove('visible');
+          document.getElementById('error-card').classList.add('visible');
+          document.getElementById('error-msg').textContent = err.message || 'Something went wrong. Please try again.';
+        }
+      }
+
+      // ── SHOW RESULT ──
+      function showResult(data) {
+        document.getElementById('section-loading').classList.remove('visible');
+
+        const score = data.riskScore;
+        const cls = score >= 65 ? 'high' : score >= 35 ? 'moderate' : 'low';
+        const icons = { low: '🟢', moderate: '🟡', high: '🔴' };
+        const plain = { low: 'Low Risk', moderate: 'Moderate Risk', high: 'High Risk' };
+        const messages = {
+          low: 'Good news — your answers suggest low concern right now. Keep up healthy habits and have a check-up with your doctor if anything changes.',
+          moderate: 'Your answers show some areas worth watching. We recommend speaking with your doctor for a more detailed check.',
+          high: 'Your answers indicate several signs that need attention. Please book an appointment with your doctor as soon as you can.'
+        };
+
+        document.getElementById('result-icon').textContent = icons[cls];
+        const labelEl = document.getElementById('result-label');
+        labelEl.textContent = plain[cls];
+        labelEl.className = 'result-label ' + cls;
+        document.getElementById('result-summary').textContent = messages[cls] + ' ' + (data.summary || '');
+        document.getElementById('gauge-num').textContent = score + '%';
+
+        const fill = document.getElementById('gauge-fill');
+        const circumference = 301.59;
+        fill.style.strokeDashoffset = String(circumference - (circumference * score) / 100);
+        fill.style.stroke = cls === 'high' ? '#dc2626' : cls === 'moderate' ? '#d97706' : '#16a34a';
+
+        // Factors
+        const factorsList = document.getElementById('factors-list');
+        const arrows = { increased: '📈', reduced: '📉' };
+        factorsList.innerHTML = (data.topFactors || []).slice(0, 5).map(f => `
+          <div class="factor-item">
+            <span class="factor-arrow">${arrows[f.direction] || '•'}</span>
+            <div class="factor-text">
+              <strong>${simplifyLabel(f.label)}</strong>
+              <p>${simplifyText(f.text)}</p>
+            </div>
+          </div>
+        `).join('');
+
+        document.getElementById('result-section').classList.add('visible');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // ── SIMPLIFY LABELS & TEXTS ──
+      const labelMap = {
+        'MMSE Score': 'Memory test score (MMSE)',
+        'MoCA Score': 'Memory test score (MoCA)',
+        'Clinical Dementia Rating': 'Doctor\'s dementia rating',
+        'Memory Recall Score': 'How well you remember recent things',
+        'Orientation Score': 'Knowing where you are / the date',
+        'Daily Function Score': 'Managing daily tasks',
+        'Mood Change Severity': 'Changes in mood or behaviour',
+        'Sleep Quality': 'Sleep quality',
+        'Medication Adherence': 'Taking medicines on time',
+        'Wandering / Getting Lost': 'Getting lost in familiar places',
+        'Family History': 'Family history of dementia',
+        'APOE-e4 Carrier': 'Genetic risk factor (APOE-e4)',
+        'CSF Amyloid-beta': 'Brain protein (Amyloid-beta) test',
+        'CSF Tau': 'Brain protein (Tau) test',
+        'Years of Education': 'Years of education',
+        'Hypertension': 'High blood pressure',
+        'Diabetes': 'Diabetes',
+      };
+
+      function simplifyLabel(label) {
+        return labelMap[label] || label;
+      }
+
+      function simplifyText(text) {
+        return text
+          .replace('pushed the risk estimate upward', 'raised the concern level')
+          .replace('reduced the risk estimate', 'lowered the concern level')
+          .replace('is lower than expected and', 'was lower than normal and')
+          .replace('is elevated or present and', 'was higher than normal and')
+          .replace('is relatively preserved and', 'is still in good shape and')
+          .replace('is lower or absent and', 'was low or not present and');
+      }
+
+      // ── DOWNLOAD REPORT ──
+      async function downloadReport() {
+        const btn = document.getElementById('report-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Preparing report…';
+        try {
+          const payload = getPayload();
+          const res = await fetch('/api/report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed');
+          window.location.href = data.reportUrl;
+        } catch (err) {
+          alert('Could not generate report: ' + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '📄 Download Full Report (PDF)';
+        }
+      }
+
+      // ── RESTART ──
+      function restartForm() {
+        document.getElementById('result-section').classList.remove('visible');
+        showSection(1);
+      }
+
+      // ── HIGH RISK SAMPLE ──
+      function loadHighRiskSample() {
+        const s = { age: 74, education_years: 10, family_history: 1, apoe4: 1, mmse: 22, moca: 19, cdr: 0.5, memory_recall: 3, orientation: 7, daily_function: 5, mood_change: 6, sleep_quality: 4, wandering: 1, medication_adherence: 5, hypertension: 1, diabetes: 0, amyloid_beta: 620, tau: 540 };
+        document.getElementById('f-age').value = s.age;
+        document.getElementById('f-education').value = s.education_years;
+        document.getElementById('f-mmse').value = s.mmse;
+        document.getElementById('f-moca').value = s.moca;
+        document.getElementById('f-amyloid_beta').value = s.amyloid_beta;
+        document.getElementById('f-tau').value = s.tau;
+        ['memory_recall','orientation','daily_function','mood_change','sleep_quality','medication_adherence'].forEach(key => {
+          const el = document.getElementById('f-' + key);
+          if (el) { el.value = s[key]; updateSlider(el); }
+        });
+        // YN buttons
+        [['family_history', s.family_history], ['apoe4', s.apoe4], ['wandering', s.wandering], ['hypertension', s.hypertension], ['diabetes', s.diabetes]].forEach(([field, val]) => {
+          document.getElementById('f-' + field).value = val;
+          const group = document.getElementById('f-' + field).previousElementSibling;
+          if (group && group.classList.contains('yn-group')) {
+            group.querySelectorAll('.yn-btn').forEach(b => {
+              b.classList.toggle('selected', +b.dataset.val === val);
+            });
+          }
+        });
+        // CDR
+        const cdrBtn = document.querySelector(`#cdr-scale .cdr-card[data-val="${s.cdr}"]`);
+        if (cdrBtn) selectCDR(cdrBtn, s.cdr);
+        // Clinical sliders
+        updateClinSlider('mmse', s.mmse);
+        updateClinSlider('moca', s.moca);
+      }
+
+      // Init
+      renderProgress();
+    </script>
   </body>
 </html>
